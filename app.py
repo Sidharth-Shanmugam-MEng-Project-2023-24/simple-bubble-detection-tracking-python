@@ -4,8 +4,12 @@ import numpy as np
 
 from VideoStream import Stream
 from ConsoleLogger import CDLogger
+from BSDetect import Detector
+from WindowManager import Window
 
 VIDEO_CAPTURE = "./Arran_seabed.mp4"
+# VIDEO_CAPTURE = 0
+CANNY_THRESHOLD_SIGMA = 0.4
 
 # Initialise the video capture
 stream = Stream(VIDEO_CAPTURE)
@@ -13,8 +17,16 @@ stream = Stream(VIDEO_CAPTURE)
 # Initialise console logger
 console = CDLogger()
 
+# Initialise the backscatter detector
+detector = Detector(
+    canny_threshold_sigma=CANNY_THRESHOLD_SIGMA,
+    histequ_step=True,
+    debug_windows=True
+)
+
 # Initialise windows for output
-cv.namedWindow("Input Stream")
+input_stream_window = Window("Input Stream")
+bs_detection_window = Window("BSDetection Output")
 
 # Initialise array to store time to process each frame (FPT)
 frame_processing_time = []
@@ -43,7 +55,13 @@ while success:
     frame_processing_start = time.time()
 
     # Display original feed to window
-    cv.imshow("Input Stream", frame)
+    input_stream_window.update(frame)
+
+    # 
+    canny = detector.detect(frame)
+
+    #
+    bs_detection_window.update(canny)
 
     # Record the end timestamp of frame processing iteration
     frame_processing_end = time.time()

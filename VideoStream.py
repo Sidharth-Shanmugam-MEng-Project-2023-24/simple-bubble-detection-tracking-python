@@ -27,7 +27,7 @@ class Stream:
 
 
 
-class TStream:
+class t_Stream:
 
     def __init__(self, source, queueSize=4096):
         # initialise the OpenCV stream
