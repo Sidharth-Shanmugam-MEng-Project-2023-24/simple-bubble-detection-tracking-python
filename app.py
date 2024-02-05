@@ -8,8 +8,9 @@ from BSDetect import Detector
 from WindowManager import Window
 
 VIDEO_CAPTURE = "./Arran_seabed.mp4"
+# VIDEO_CAPTURE = "/Users/sid/Documents/Uni/Course/Year 4/MEng/code/backscatter.png"
 # VIDEO_CAPTURE = 0
-CANNY_THRESHOLD_SIGMA = 0.4
+CANNY_THRESHOLD_SIGMA = 0.5
 
 # Initialise the video capture
 stream = Stream(VIDEO_CAPTURE)
@@ -21,7 +22,7 @@ console = CDLogger()
 detector = Detector(
     canny_threshold_sigma=CANNY_THRESHOLD_SIGMA,
     histequ_step=True,
-    debug_windows=True
+    debug_windows=False
 )
 
 # Initialise windows for output
@@ -57,10 +58,19 @@ while success:
     # Display original feed to window
     input_stream_window.update(frame)
 
-    # 
-    canny = detector.detect(frame)
+    # # 
+    canny, contours = detector.detect(frame)
 
-    #
+    cv.drawContours(
+        frame,
+        contours,
+        -1,
+        (0, 0, 255),
+        cv.FILLED
+    )
+    input_stream_window.update(frame)
+
+    
     bs_detection_window.update(canny)
 
     # Record the end timestamp of frame processing iteration
@@ -83,9 +93,9 @@ while success:
 
     # Console logging metrics
     nframes = len(frame_processing_time)
-    afpt = np.mean(frame_processing_time)
+    afpt = np.mean(frame_processing_time) * 1000
     tfpt = stream.target_fpt
-    afps = 1 / afpt
+    afps = 1 / (afpt/1000)
     tfps = stream.target_fps
     console.display(nframes, afpt, tfpt, afps, tfps)
 
